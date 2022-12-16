@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import dfw.core.model.Coordinate;
 import dfw.core.model.InterpolationStrategy;
+import dfw.core.model.Shape;
 import dfw.core.model.Tract;
 import dfw.database.DataRepository;
 
@@ -65,7 +68,6 @@ class DfwBackendApplicationTests {
 	void testCentroidStrategy() {
 		List<Tract> result = repo.findTracts(c, radiusMeter, InterpolationStrategy.CENTROID);
 		assertThat(result).isNotNull().isNotEmpty();
-		assertThat(result.size()).isEqualTo(18);
 		assertThat(result.stream().map(Tract::ratio)).allMatch(x -> x == 1).noneMatch(x -> x > 1);
 	}
 	
@@ -73,11 +75,31 @@ class DfwBackendApplicationTests {
 	void testArealProportionStrategy() {
 		List<Tract> result = repo.findTracts(c, radiusMeter, InterpolationStrategy.AREAL_PROPORTION);
 		assertThat(result).isNotNull().isNotEmpty();
-		assertThat(result.size()).isEqualTo(28);
-//		assertThat(result.stream().map(Tract::ratio)).noneMatch(x -> x > 1);
-		
-		result.stream().forEach(System.out::println);
-		
-		
 	}
+	
+	@Test
+	void testAllCentroidInAreal() {
+		Set<Long> centroidResult = repo.findTracts(c, radiusMeter, InterpolationStrategy.CENTROID).stream().map(Tract::id).collect(Collectors.toSet());
+		Set<Long> arealProportionResult = repo.findTracts(c, radiusMeter, InterpolationStrategy.AREAL_PROPORTION).stream().map(Tract::id).collect(Collectors.toSet());
+		
+		assertThat(arealProportionResult).containsAll(centroidResult);
+	}
+	
+	@Test
+	void testGetAllShapes() {
+		List<Shape> result = repo.findAllShapes();
+		assertThat(result).isNotEmpty();
+	}
+	
+	@Test
+	void testGetShapesWithIds() {
+		List<Long> ids = repo.findTracts(
+				c,
+				radiusMeter,
+				InterpolationStrategy.CENTROID).stream().map(Tract::id).collect(Collectors.toList());
+		
+		List<Shape> result = repo.findShapes(ids);
+		assertThat(result).isNotEmpty().hasSize(ids.size());
+	}
+	
 }
