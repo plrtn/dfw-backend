@@ -1,5 +1,8 @@
 package dfw.core.model;
 
-import java.io.InputStream;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record Shape(long id, InputStream geojson) { }
+public record Shape(
+        @JsonProperty("id") long id,
+        @JsonProperty("geojson") String geojson) {
+}

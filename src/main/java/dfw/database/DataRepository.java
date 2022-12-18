@@ -19,39 +19,39 @@ import dfw.core.model.Tract;
 @Repository
 public class DataRepository {
 
-	@Autowired(required = true)
-	private JdbcTemplate jdbc;
-	
-	@Autowired(required =  true)
-	private NamedParameterJdbcTemplate namedParamJdbc;
+    @Autowired(required = true)
+    private JdbcTemplate jdbc;
 
-	public List<Shape> findAllShapes() {
-		final String sql = """
-				select "Key", ST_AsGeoJSON(spatialobj) from dfw_demo
-				""";
-		
-		return jdbc.query(sql, new ShapeMapper());
-	}
+    @Autowired(required = true)
+    private NamedParameterJdbcTemplate namedParamJdbc;
 
-	public List<Tract> findTracts(Coordinate c, double radiusMeter, InterpolationStrategy strategy) {
-		return jdbc.query(strategy.getSql(), pps -> {
-			pps.setDouble(1, c.latitude());
-			pps.setDouble(2, c.longitude());
-			pps.setDouble(3, radiusMeter);
-		}, new TractMapper());
-	}
-	
-	// https://stackoverflow.com/a/1327222
-	public List<Shape> findShapes(List<Long> id){
-		final String sql = """
-				select "Key", ST_AsGeoJSON(spatialobj) from dfw_demo
-				where "Key" in (:ids);
-				""";
-		
-		return namedParamJdbc.query(
-				sql,
-				new MapSqlParameterSource("ids", id.stream().map(String::valueOf).collect(Collectors.toList())),
-				new ShapeMapper());
-	}
+    public List<Shape> findAllShapes() {
+        final String sql = """
+                select "Key", ST_AsGeoJSON(spatialobj) from dfw_demo
+                """;
+
+        return jdbc.query(sql, new ShapeMapper());
+    }
+
+    public List<Tract> findTracts(Coordinate c, double radiusMeter, InterpolationStrategy strategy) {
+        return jdbc.query(strategy.getSql(), pps -> {
+            pps.setDouble(1, c.latitude());
+            pps.setDouble(2, c.longitude());
+            pps.setDouble(3, radiusMeter);
+        }, new TractMapper());
+    }
+
+    // https://stackoverflow.com/a/1327222
+    public List<Shape> findShapes(List<Long> id) {
+        final String sql = """
+                select "Key", ST_AsGeoJSON(spatialobj) from dfw_demo
+                where "Key" in (:ids);
+                """;
+
+        return namedParamJdbc.query(
+                sql,
+                new MapSqlParameterSource("ids", id.stream().map(String::valueOf).collect(Collectors.toList())),
+                new ShapeMapper());
+    }
 
 }

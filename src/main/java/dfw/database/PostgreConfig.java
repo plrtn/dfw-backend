@@ -14,23 +14,23 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 @PropertySource("classpath:application.properties")
 @PropertySource("classpath:env.properties")
 public class PostgreConfig {
-	
-	@Bean
-	@ConfigurationProperties("app.database")
-	DataSource getDataSource() {
-		return DataSourceBuilder
-				.create()
-				.driverClassName("org.postgresql.Driver")
-				.build();
-	}
-	
-	@Bean
-	JdbcTemplate getJdbcTemplate() {
-		return new JdbcTemplate(this.getDataSource());
-	}
-	
-	@Bean
-	NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
-		return new NamedParameterJdbcTemplate(getDataSource());
-	}
+
+    @Bean
+    @ConfigurationProperties("app.database")
+    DataSource getDataSource() {
+        return DataSourceBuilder
+                .create()
+                .driverClassName("org.postgresql.Driver")
+                .build();
+    }
+
+    @Bean
+    JdbcTemplate getJdbcTemplate() {
+        return new JdbcTemplate(this.getDataSource());
+    }
+
+    @Bean
+    NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
+        return new NamedParameterJdbcTemplate(this.getDataSource());
+    }
 }
